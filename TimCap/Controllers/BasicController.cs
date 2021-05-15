@@ -38,12 +38,29 @@ namespace TimCap.Controllers
             return "ok";
         }
 
-        [HttpPost("timecap/login")]
-        public ApiRes Login([Required] string UserId, [Required] string session)
+        [HttpPost("timecap/loginccnu")]
+        public ApiRes LoginCcnu([Required] string UserId,[Required] string pwd,[Required] string session)
         {
             _cache.Set(UserId, session, _options);
+
+
+
             return new ApiRes(ApiCode.Success, "登录成功", session);
         }
+
+
+        [HttpPost("timecap/loginwut")]
+        public ApiRes LoginWut([Required] string UserId, [Required] string session)
+        {
+            _cache.Set(UserId, session, _options);
+            Response.Redirect(
+                "http://ias.sso.itoken.team/portal.php?posturl=https%3A%2F%2Flucky-day.itoken.team%2Flucky_2019%2flogin%2fias&continueurl=");
+
+
+
+            return new ApiRes(ApiCode.Success, "登录成功", session);
+        }
+
 
         /// <summary>
         /// 添加一个胶囊
@@ -68,6 +85,7 @@ namespace TimCap.Controllers
         /// <param name="CapId">胶囊Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
+
         [HttpDelete("timecap/remove")]
         public ApiRes Remove([Required] string UserId,[Required] int CapId,[Required] string session)
         {
@@ -76,12 +94,14 @@ namespace TimCap.Controllers
             {
                 return new ApiRes(ApiCode.Error, "不存在此胶囊", null);
             }
+
             if (cap.UserId == UserId)
             {
                 _context.Remove(cap);
                 _context.SaveChanges();
                 return new ApiRes(ApiCode.Success, "胶囊删除成功", null);
             }
+
             return new ApiRes(ApiCode.Error, "用户错误", null);
         }
 
@@ -95,8 +115,8 @@ namespace TimCap.Controllers
         public ApiRes CapsQueryOwn([Required] string UserId, [Required] string session)
         {
             var caps = (from item in _context.Caps
-                        where item.UserId == UserId
-                        select item).AsNoTracking();
+                where item.UserId == UserId
+                select item).AsNoTracking();
             return new ApiRes(ApiCode.Success, "查询成功", caps);
         }
 
