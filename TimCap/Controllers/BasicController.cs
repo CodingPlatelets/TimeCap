@@ -23,6 +23,7 @@ namespace TimCap.Controllers
     [ApiController]
     public class BasicController : ControllerBase
     {
+
         private readonly TimeCapContext _context;
         // private IMemoryCache _cache;
         // private Session _session;
@@ -41,6 +42,13 @@ namespace TimCap.Controllers
             _service = service;
             _logger = logger;
         }
+        private string GenerateFakeFinger()
+        {
+            var random = new Random();
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var finger = new string(Enumerable.Repeat(chars, 50).Select(s => s[random.Next(chars.Length)]).ToArray());
+            return finger;
+        }
 
 
         [HttpGet("test")]
@@ -52,8 +60,7 @@ namespace TimCap.Controllers
         [HttpPost("loginccnu")]
         public ApiRes LoginCcnu([Required] string userId,[Required] string pwd)
         {
-            var ran = new Random();
-            string session = ran.Next(1000000, 9999999).ToString();
+            string session = GenerateFakeFinger();
             // _cache.Set(userId,session, _options);
             var user = new User
             {
@@ -81,9 +88,11 @@ namespace TimCap.Controllers
         [HttpPost("callback")]
         public ApiRes LoginCallBack([FromForm]string continueurl, [FromForm] string user,[FromForm] string token)
         {
+            string session = GenerateFakeFinger();
             var jsonUser = JsonSerializer.Deserialize<WhutUserInfo>(HttpUtility.UrlDecode(user));
             var sno = jsonUser.Sno;
-            return new ApiRes(ApiCode.Success, "", null);
+            Response.Cookies.Append(sno, session, _options);
+            return new ApiRes(ApiCode.Success, "登录成功", session);
         }
 
         /// <summary>
