@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using TimCap.DAO;
 using TimCap.Model;
 
@@ -17,15 +18,31 @@ namespace TimCap.Controllers
     public class BasicController : ControllerBase
     {
         private readonly TimeCapContext _context;
-        public BasicController(TimeCapContext context)
+        private IMemoryCache _cache;
+        private MemoryCacheEntryOptions _options;
+
+        public BasicController(TimeCapContext context, IMemoryCache cache)
         {
             _context = context;
+            _cache = cache;
+            _options = new MemoryCacheEntryOptions()
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(10),
+            };
         }
+
 
         [HttpGet("test")]
         public string Func()
         {
             return "ok";
+        }
+
+        [HttpPost("timecap/login")]
+        public ApiRes Login([Required] string UserId, [Required] string session)
+        {
+            _cache.Set(UserId, session, _options);
+            return new ApiRes(ApiCode.Success, "登录成功", session);
         }
 
         /// <summary>

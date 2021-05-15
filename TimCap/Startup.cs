@@ -32,6 +32,7 @@ namespace TimCap
             services.AddDbContext<TimeCapContext>(opt =>
                 opt.UseMySql(connStr, ServerVersion.AutoDetect(connStr)));
             services.AddControllers();
+            services.AddMemoryCache();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TimCap", Version = "v1" });
