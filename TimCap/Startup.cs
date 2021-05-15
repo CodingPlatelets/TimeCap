@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using TimCap.DAO;
+using TimCap.Services;
 
 namespace TimCap
 {
@@ -37,7 +38,8 @@ namespace TimCap
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TimCap", Version = "v1" });
             });
-           
+            services.AddHttpClient<LoginService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

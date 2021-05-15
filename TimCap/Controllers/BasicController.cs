@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using TimCap.DAO;
 using TimCap.Model;
+using TimCap.Services;
 
 namespace TimCap.Controllers
 {
@@ -20,8 +21,9 @@ namespace TimCap.Controllers
         private readonly TimeCapContext _context;
         private IMemoryCache _cache;
         private MemoryCacheEntryOptions _options;
+        private LoginService _service;
 
-        public BasicController(TimeCapContext context, IMemoryCache cache)
+        public BasicController(TimeCapContext context, IMemoryCache cache,LoginService service)
         {
             _context = context;
             _cache = cache;
@@ -29,6 +31,7 @@ namespace TimCap.Controllers
             {
                 SlidingExpiration = TimeSpan.FromMinutes(10),
             };
+            _service = service;
         }
 
 
@@ -39,12 +42,22 @@ namespace TimCap.Controllers
         }
 
         [HttpPost("timecap/loginccnu")]
-        public ApiRes LoginCcnu([Required] string UserId,[Required] string pwd,[Required] string session)
+        public ApiRes LoginCcnu([Required] string UserId,[Required] string pwd)
         {
-            _cache.Set(UserId, session, _options);
-
-
-
+            var ran = new Random();
+            string session = ran.Next(1000000, 9999999).ToString();
+            _cache.Set(UserId,session, _options);
+            var user = new User
+            {
+                sno = UserId,
+                password = pwd
+            };
+            var apiRes = _service.LoginThrougthCcnu(user).Result;
+            if (apiRes.Code == ApiCode.Error)
+            {
+                return apiRes;
+            }
+            
             return new ApiRes(ApiCode.Success, "登录成功", session);
         }
 
@@ -73,6 +86,11 @@ namespace TimCap.Controllers
         [HttpPost("timecap/add")]
         public ApiRes AddItem([Required] string UserId, [Required] string Address, [Required] string Story, [Required] string session)
         {
+            if (_cache.Get<string>(UserId) != session)
+            {
+                return new ApiRes(ApiCode.Error, "用户未登录", null);
+            }
+            
             _context.Caps.Add(new Caps(UserId, Address, Story));
             _context.SaveChanges();
             return new ApiRes(ApiCode.Success, "添加胶囊成功", Story);
@@ -89,6 +107,10 @@ namespace TimCap.Controllers
         [HttpDelete("timecap/remove")]
         public ApiRes Remove([Required] string UserId,[Required] int CapId,[Required] string session)
         {
+            if (_cache.Get<string>(UserId) != session)
+            {
+                return new ApiRes(ApiCode.Error, "用户未登录", null);
+            }
             var cap = _context.Caps.Find(CapId);
             if (cap == null)
             {
@@ -114,6 +136,10 @@ namespace TimCap.Controllers
         [HttpPost("timecap/query/own")]
         public ApiRes CapsQueryOwn([Required] string UserId, [Required] string session)
         {
+            if (_cache.Get<string>(UserId) != session)
+            {
+                return new ApiRes(ApiCode.Error, "用户未登录", null);
+            }
             var caps = (from item in _context.Caps
                 where item.UserId == UserId
                 select item).AsNoTracking();
@@ -129,6 +155,10 @@ namespace TimCap.Controllers
         [HttpPost("timecap/query/dig")]
         public ApiRes CapsQueryDig([Required] string UserId, [Required] string session)
         {
+            if (_cache.Get<string>(UserId) != session)
+            {
+                return new ApiRes(ApiCode.Error, "用户未登录", null);
+            }
             var caps = (from c in _context.Caps
                        where (from item in _context.CapDigs
                               where item.UserDig == UserId
@@ -147,6 +177,10 @@ namespace TimCap.Controllers
         [HttpPost("timecap/dig")]
         public ApiRes Dig([Required] string userId, [Required] string address, [Required] string session)
         {
+            if (_cache.Get<string>(userId) != session)
+            {
+                return new ApiRes(ApiCode.Error, "用户未登录", null);
+            }
             var capIds = (from c in _context.Caps 
                          where c.Address == address && !(from item in _context.CapDigs
                                                          where item.UserDig == userId
