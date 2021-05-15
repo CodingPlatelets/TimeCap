@@ -10,6 +10,7 @@ namespace TimCap.DAO
     public class TimeCapContext : DbContext
     {
         public DbSet<Cap> Caps { get; set; }
+        public DbSet <OutTime> Outs { get; set; }
 
         public TimeCapContext(DbContextOptions<TimeCapContext> options): base(options)
         {

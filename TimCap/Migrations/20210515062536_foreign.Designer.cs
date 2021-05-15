@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TimCap.DAO;
 
 namespace TimCap.Migrations
 {
     [DbContext(typeof(TimeCapContext))]
-    partial class TimeCapContextModelSnapshot : ModelSnapshot
+    [Migration("20210515062536_foreign")]
+    partial class foreign
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
