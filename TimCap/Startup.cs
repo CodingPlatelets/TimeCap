@@ -19,6 +19,7 @@ namespace TimCap
 {
     public class Startup
     {
+        private readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -40,6 +41,14 @@ namespace TimCap
             });
             services.AddHttpClient<LoginService>();
             services.AddLogging();
+            services.AddCors(options =>
+           {
+               options.AddPolicy(name: MyAllowSpecificOrigins,
+                   build =>
+                   {
+                       build.AllowAnyOrigin();
+                   });
+           });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
