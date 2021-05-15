@@ -39,7 +39,7 @@ namespace TimCap.Controllers
         [HttpPost("timecap/add")]
         public ApiRes AddItem([Required] string UserId, [Required]string Story, [Required]string Address, [Required]string session)
         {
-            _context.Caps.Add(new CapOwn
+            _context.Caps.Add(new Caps
             {
                 Story = Story,
                 InTime = DateTime.Now,
@@ -60,7 +60,7 @@ namespace TimCap.Controllers
         [HttpGet("timecap/remove")]
         public ApiRes Remove([Required] string UserId,[Required] int CapId,[Required] string session)
         {
-            var cap = _context.CapOwns.Find(CapId);
+            var cap = _context.Caps.Find(CapId);
             if (cap == null)
             {
                 return new ApiRes(ApiCode.Error, "不存在此胶囊", null);
@@ -83,7 +83,7 @@ namespace TimCap.Controllers
         [HttpPost("timecap/query/own")]
         public ApiRes CapsQueryOwn([Required] string UserId, [Required] string session)
         {
-            var caps = (from item in _context.CapOwns
+            var caps = (from item in _context.Caps
                         where item.UserId == UserId
                         select item).AsNoTracking();
             return new ApiRes(ApiCode.Success, "查询成功", caps);
@@ -92,14 +92,14 @@ namespace TimCap.Controllers
         /// <summary>
         /// 查询用户挖到的胶囊
         /// </summary>
-        [HttpPost("timecap/query/dig")]
-        public ApiRes CapsQueryDig([Required] string UserId, [Required] string session)
-        {
-            var caps = (from item in _context.CapDigs
-                        where item.CapDigId == UserId
-                        select item)
-            return new ApiRes(ApiCode.Success, "查询成功", caps)
-        }
+        //[HttpPost("timecap/query/dig")]
+        //public ApiRes CapsQueryDig([Required] string UserId, [Required] string session)
+        //{
+        //    var caps = (from item in _context.CapDigs
+        //                where item.CapDigId == UserId
+        //                select item)
+        //    return new ApiRes(ApiCode.Success, "查询成功", caps)
+        //}
 
         [HttpPost("timecap/dig")]
         public ApiRes Dig([Required] string UserId, [Required] string address, [Required] string session)

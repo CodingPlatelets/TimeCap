@@ -12,7 +12,7 @@ namespace TimCap.Model
         [Key]
         public int CapDigId { get; set; }
         [ForeignKey("CapOwnId")]
-        public CapOwn Cap { get; set; }
+        public Caps Cap { get; set; }
         public string UserDig { get; set; }
         public int CapId { get; set; }
 

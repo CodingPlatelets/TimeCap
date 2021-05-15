@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TimCap.Model
 {
-    public class CapOwn
+    public class Caps
     {
         [Key]
         [ForeignKey("OutId")]
