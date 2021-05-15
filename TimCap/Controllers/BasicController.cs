@@ -106,11 +106,10 @@ namespace TimCap.Controllers
         [HttpPost("add")]
         public ApiResponse AddItem([Required] string userid, [Required] string address, [Required] string story, [Required] string session)
         {
-            if (!Request.Cookies.TryGetValue(userid,out session))
+            if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
-            
             _context.Capsules.Add(new Capsule(userid, address, story));
             _context.SaveChanges();
             return new ApiResponse(ApiCode.Success, "添加胶囊成功", story);
@@ -119,24 +118,24 @@ namespace TimCap.Controllers
         /// <summary>
         /// 删除用户的胶囊
         /// </summary>
-        /// <param name="userId">用户Id</param>
-        /// <param name="capId">胶囊Id</param>
+        /// <param name="userid">用户Id</param>
+        /// <param name="capid">胶囊Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpDelete("remove")]
-        public ApiResponse Remove([Required] string userId,[Required] int capId,[Required] string session)
+        public ApiResponse Remove([Required] string userid,[Required] int capid,[Required] string session)
         {
-            if (!Request.Cookies.TryGetValue(userId, out session))
+            if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
-            var cap = _context.Capsules.Find(capId);
+            var cap = _context.Capsules.Find(capid);
             if (cap == null)
             {
                 return new ApiResponse(ApiCode.Error, "不存在此胶囊", null);
             }
 
-            if (cap.UserId == userId)
+            if (cap.UserId == userid)
             {
                 _context.Remove(cap);
                 _context.SaveChanges();
@@ -155,7 +154,7 @@ namespace TimCap.Controllers
         [HttpPost("query/own")]
         public ApiResponse CapsQueryOwn([Required] string userid, [Required] string session)
         {
-            if (!Request.Cookies.TryGetValue(userid, out session))
+            if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
@@ -174,7 +173,7 @@ namespace TimCap.Controllers
         [HttpPost("query/dig")]
         public ApiResponse CapsQueryDig([Required] string userid, [Required] string session)
         {
-            if (!Request.Cookies.TryGetValue(userid, out session))
+            if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
@@ -196,7 +195,7 @@ namespace TimCap.Controllers
         [HttpPost("dig")]
         public ApiResponse Dig([Required] string userid, [Required] string address, [Required] string session)
         {
-            if (!Request.Cookies.TryGetValue(userid, out session))
+            if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
