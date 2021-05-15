@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 
 namespace TimCap.Model
 {
-    public class Caps
+    public class Capsule
     {
         [Key]
         [ForeignKey("OutId")]
-        public int CapId { get; set; }
+        public int CapsuleId { get; set; }
         public string Story { get; set; }
         public DateTime InTime { get; set; }
         public string Address { get; set; }
         public string UserId { get; set; }
 
-        public Caps() { }
-        public Caps(string userId, string address, string story)
+        public Capsule() { }
+        public Capsule(string userId, string address, string story)
         {
             UserId = userId;
             Address = address;

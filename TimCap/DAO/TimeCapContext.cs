@@ -9,8 +9,8 @@ namespace TimCap.DAO
 {
     public class TimeCapContext : DbContext
     {
-        public DbSet<Caps> Caps { get; set; }
-        public DbSet <CapDig> CapDigs { get; set; }
+        public DbSet<Capsule> Capsules { get; set; }
+        public DbSet <CapsuleDig> CapsuleDigs { get; set; }
 
         public TimeCapContext(DbContextOptions<TimeCapContext> options): base(options)
         {
@@ -23,7 +23,7 @@ namespace TimCap.DAO
         //初始化数据库
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CapDig>().HasKey(c => new { c.CapId, c.UserDig });
+            modelBuilder.Entity<CapsuleDig>().HasKey(c => new { c.CapsuleId, c.UserDig });
         }
     }
 }

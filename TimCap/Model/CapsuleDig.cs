@@ -7,21 +7,21 @@ using System.Threading.Tasks;
 
 namespace TimCap.Model
 {
-    public class CapDig
+    public class CapsuleDig
     {
-        [ForeignKey("CapId")]
-        public Caps Cap { get; set; }
+        [ForeignKey("CapsuleId")]
+        public Capsule Capsule { get; set; }
         [Key,Column(Order = 1)]
         public string UserDig { get; set; }
         [Key,Column(Order = 2)]
-        public int CapId { get; set; }
+        public int CapsuleId { get; set; }
         public DateTime DigTime { get; set; }
 
-        public CapDig() { }
-        public CapDig(string userId, int capId)
+        public CapsuleDig() { }
+        public CapsuleDig(string userId, int capId)
         {
             UserDig = userId;
-            CapId = capId;
+            CapsuleId = capId;
             DigTime = DateTime.Now;
         }
     }

@@ -20,7 +20,7 @@ namespace TimCap.Services
             Client = client;
         }
 
-        public async Task<ApiRes> LoginThrougthCcnu(User user)
+        public async Task<ApiResponse> LoginThrougthCcnu(User user)
         {
             
             var response = await Client.SendAsync(
@@ -35,11 +35,11 @@ namespace TimCap.Services
                 .RootElement.GetProperty("msg").GetString();
             if (IsSuccess != "登陆成功")
             {
-                return new ApiRes(ApiCode.Error,"登录失败",null);
+                return new ApiResponse(ApiCode.Error,"登录失败",null);
             }
             else
             {
-                return new ApiRes(ApiCode.Success,"登录成功", JsonDocument.Parse(response.Content.ReadAsStringAsync().Result)
+                return new ApiResponse(ApiCode.Success,"登录成功", JsonDocument.Parse(response.Content.ReadAsStringAsync().Result)
                     .RootElement.GetProperty("data").GetProperty("sno").GetString());
             }
 

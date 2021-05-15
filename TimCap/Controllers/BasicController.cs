@@ -58,13 +58,13 @@ namespace TimCap.Controllers
         }
 
         [HttpPost("loginccnu")]
-        public ApiRes LoginCcnu([Required] string userId,[Required] string pwd)
+        public ApiResponse LoginCcnu([Required] string userid,[Required] string pwd)
         {
             string session = GenerateFakeFinger();
             // _cache.Set(userId,session, _options);
             var user = new User
             {
-                sno = userId,
+                sno = userid,
                 password = pwd
             };
             var apiRes = _service.LoginThrougthCcnu(user).Result;
@@ -73,8 +73,8 @@ namespace TimCap.Controllers
                 return apiRes;
             }
 
-            Response.Cookies.Append(userId, session, _options);
-            return new ApiRes(ApiCode.Success, "登录成功", session);
+            Response.Cookies.Append(userid, session, _options);
+            return new ApiResponse(ApiCode.Success, "登录成功", session);
         }
 
 
@@ -86,135 +86,135 @@ namespace TimCap.Controllers
         }
 
         [HttpPost("callback")]
-        public ApiRes LoginCallBack([FromForm]string continueurl, [FromForm] string user,[FromForm] string token)
+        public ApiResponse LoginCallBack([FromForm]string continueurl, [FromForm] string user,[FromForm] string token)
         {
             string session = GenerateFakeFinger();
             var jsonUser = JsonSerializer.Deserialize<WhutUserInfo>(HttpUtility.UrlDecode(user));
             var sno = jsonUser.Sno;
             Response.Cookies.Append(sno, session, _options);
-            return new ApiRes(ApiCode.Success, "登录成功", session);
+            return new ApiResponse(ApiCode.Success, "登录成功", session);
         }
 
         /// <summary>
         /// 添加一个胶囊
         /// </summary>
-        /// <param name="UserId">用户Id</param>
-        /// <param name="Story">故事</param>
-        /// <param name="Address">地点</param>
+        /// <param name="userid">用户Id</param>
+        /// <param name="story">故事</param>
+        /// <param name="address">地点</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpPost("add")]
-        public ApiRes AddItem([Required] string UserId, [Required] string Address, [Required] string Story, [Required] string session)
+        public ApiResponse AddItem([Required] string userid, [Required] string address, [Required] string story, [Required] string session)
         {
-            if (!Request.Cookies.TryGetValue(UserId,out session))
+            if (!Request.Cookies.TryGetValue(userid,out session))
             {
-                return new ApiRes(ApiCode.Error, "用户未登录", null);
+                return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
             
-            _context.Caps.Add(new Caps(UserId, Address, Story));
+            _context.Capsules.Add(new Capsule(userid, address, story));
             _context.SaveChanges();
-            return new ApiRes(ApiCode.Success, "添加胶囊成功", Story);
+            return new ApiResponse(ApiCode.Success, "添加胶囊成功", story);
         }
 
         /// <summary>
         /// 删除用户的胶囊
         /// </summary>
-        /// <param name="UserId">用户Id</param>
-        /// <param name="CapId">胶囊Id</param>
+        /// <param name="userId">用户Id</param>
+        /// <param name="capId">胶囊Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpDelete("remove")]
-        public ApiRes Remove([Required] string UserId,[Required] int CapId,[Required] string session)
+        public ApiResponse Remove([Required] string userId,[Required] int capId,[Required] string session)
         {
-            if (!Request.Cookies.TryGetValue(UserId, out session))
+            if (!Request.Cookies.TryGetValue(userId, out session))
             {
-                return new ApiRes(ApiCode.Error, "用户未登录", null);
+                return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
-            var cap = _context.Caps.Find(CapId);
+            var cap = _context.Capsules.Find(capId);
             if (cap == null)
             {
-                return new ApiRes(ApiCode.Error, "不存在此胶囊", null);
+                return new ApiResponse(ApiCode.Error, "不存在此胶囊", null);
             }
 
-            if (cap.UserId == UserId)
+            if (cap.UserId == userId)
             {
                 _context.Remove(cap);
                 _context.SaveChanges();
-                return new ApiRes(ApiCode.Success, "胶囊删除成功", null);
+                return new ApiResponse(ApiCode.Success, "胶囊删除成功", null);
             }
 
-            return new ApiRes(ApiCode.Error, "用户错误", null);
+            return new ApiResponse(ApiCode.Error, "用户错误", null);
         }
 
         /// <summary>
         /// 查询用户拥有的胶囊
         /// </summary>
-        /// <param name="UserId">用户Id</param>
+        /// <param name="userid">用户Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpPost("query/own")]
-        public ApiRes CapsQueryOwn([Required] string UserId, [Required] string session)
+        public ApiResponse CapsQueryOwn([Required] string userid, [Required] string session)
         {
-            if (!Request.Cookies.TryGetValue(UserId, out session))
+            if (!Request.Cookies.TryGetValue(userid, out session))
             {
-                return new ApiRes(ApiCode.Error, "用户未登录", null);
+                return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
-            var caps = (from item in _context.Caps
-                where item.UserId == UserId
+            var caps = (from item in _context.Capsules
+                where item.UserId == userid
                 select item).AsNoTracking();
-            return new ApiRes(ApiCode.Success, "查询成功", caps);
+            return new ApiResponse(ApiCode.Success, "查询成功", caps);
         }
 
         /// <summary>
         /// 查询用户挖到的胶囊
         /// </summary>
-        /// <param name="UserId">用户Id</param>
+        /// <param name="userid">用户Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpPost("query/dig")]
-        public ApiRes CapsQueryDig([Required] string UserId, [Required] string session)
+        public ApiResponse CapsQueryDig([Required] string userid, [Required] string session)
         {
-            if (!Request.Cookies.TryGetValue(UserId, out session))
+            if (!Request.Cookies.TryGetValue(userid, out session))
             {
-                return new ApiRes(ApiCode.Error, "用户未登录", null);
+                return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
-            var caps = (from c in _context.Caps
-                       where (from item in _context.CapDigs
-                              where item.UserDig == UserId
-                              select item.CapId).Contains(c.CapId)
+            var caps = (from c in _context.Capsules
+                       where (from item in _context.CapsuleDigs
+                              where item.UserDig == userid
+                              select item.CapsuleId).Contains(c.CapsuleId)
                               select c).AsNoTracking();
-            return new ApiRes(ApiCode.Success, "查询成功", caps);
+            return new ApiResponse(ApiCode.Success, "查询成功", caps);
         }
 
         /// <summary>
         /// 挖时光胶囊
         /// </summary>
-        /// <param name="userId">用户Id</param>
+        /// <param name="userid">用户Id</param>
         /// <param name="address">挖掘地点</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpPost("dig")]
-        public ApiRes Dig([Required] string userId, [Required] string address, [Required] string session)
+        public ApiResponse Dig([Required] string userid, [Required] string address, [Required] string session)
         {
-            if (!Request.Cookies.TryGetValue(userId, out session))
+            if (!Request.Cookies.TryGetValue(userid, out session))
             {
-                return new ApiRes(ApiCode.Error, "用户未登录", null);
+                return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
-            var capIds = (from c in _context.Caps 
-                         where c.Address == address && !(from item in _context.CapDigs
-                                                         where item.UserDig == userId
-                                                         select item.CapId).Contains(c.CapId)
-                        select c.CapId).ToList();
+            var capIds = (from c in _context.Capsules 
+                         where c.Address == address && !(from item in _context.CapsuleDigs
+                                                         where item.UserDig == userid
+                                                         select item.CapsuleId).Contains(c.CapsuleId)
+                        select c.CapsuleId).ToList();
             if (!capIds.Any())
             {
-                return new ApiRes(ApiCode.Error, "没有瓶子了", -1);
+                return new ApiResponse(ApiCode.Error, "没有瓶子了", -1);
             }
             var rand = new Random();
             var capId = capIds[rand.Next(capIds.Count)];
-            var cap = _context.Caps.Find(capId);
-            _context.CapDigs.Add(new CapDig(userId, capId));
+            var cap = _context.Capsules.Find(capId);
+            _context.CapsuleDigs.Add(new CapsuleDig(userid, capId));
             _context.SaveChanges();
-            return new ApiRes(ApiCode.Success, "成功挖到了", cap);
+            return new ApiResponse(ApiCode.Success, "成功挖到了", cap);
         }
     }
 }

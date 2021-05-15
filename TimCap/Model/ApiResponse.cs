@@ -1,12 +1,12 @@
 ﻿namespace TimCap.Model
 {
-    public class ApiRes
+    public class ApiResponse
     {
         public ApiCode Code { get; set; }
         public string Message { get; set; }
         public object Data { get; set; }
-        public ApiRes() { }
-        public ApiRes(ApiCode code, string message, object data)
+        public ApiResponse() { }
+        public ApiResponse(ApiCode code, string message, object data)
         {
             Code = code;
             Message = message;
