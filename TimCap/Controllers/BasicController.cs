@@ -13,11 +13,13 @@ using TimCap.DAO;
 using TimCap.Model;
 using TimCap.Services;
 using Microsoft.Extensions.Logging;
-
+using System.Text.RegularExpressions;
+using System.Text;
+using System.Web;
 
 namespace TimCap.Controllers
 {
-    [Route("api")]
+    [Route("api/timecap")]
     [ApiController]
     public class BasicController : ControllerBase
     {
@@ -41,13 +43,13 @@ namespace TimCap.Controllers
         }
 
 
-        [HttpGet("")]
+        [HttpGet("test")]
         public string Func()
         {
             return "ok";
         }
 
-        [HttpPost("timecap/loginccnu")]
+        [HttpPost("loginccnu")]
         public ApiRes LoginCcnu([Required] string userId,[Required] string pwd)
         {
             var ran = new Random();
@@ -69,19 +71,19 @@ namespace TimCap.Controllers
         }
 
 
-        [HttpGet("timecap/loginwut")]
+        [HttpGet("loginwut")]
         public RedirectResult LoginWut()
         {
             return Redirect(
                 "http://ias.sso.itoken.team/portal.php?posturl=http://saicem.top:5905/api/timecap/callback");
         }
 
-        [HttpPost("timecap/callback")]
-        public ApiRes LoginCallBack([FromBody] string body)
+        [HttpPost("callback")]
+        public ApiRes LoginCallBack([FromForm]string continueurl, [FromForm] string user,[FromForm] string token)
         {
-            var tmp = "---------------------------------\n";
-            _logger.LogInformation(tmp + body + tmp);
-            return new ApiRes(ApiCode.Success, "", body);
+            var jsonUser = JsonSerializer.Deserialize<WhutUserInfo>(HttpUtility.UrlDecode(user));
+            var sno = jsonUser.Sno;
+            return new ApiRes(ApiCode.Success, "", null);
         }
 
         /// <summary>
@@ -92,7 +94,7 @@ namespace TimCap.Controllers
         /// <param name="Address">地点</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
-        [HttpPost("timecap/add")]
+        [HttpPost("add")]
         public ApiRes AddItem([Required] string UserId, [Required] string Address, [Required] string Story, [Required] string session)
         {
             if (!Request.Cookies.TryGetValue(UserId,out session))
@@ -112,7 +114,7 @@ namespace TimCap.Controllers
         /// <param name="CapId">胶囊Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
-        [HttpDelete("timecap/remove")]
+        [HttpDelete("remove")]
         public ApiRes Remove([Required] string UserId,[Required] int CapId,[Required] string session)
         {
             if (!Request.Cookies.TryGetValue(UserId, out session))
@@ -141,7 +143,7 @@ namespace TimCap.Controllers
         /// <param name="UserId">用户Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
-        [HttpPost("timecap/query/own")]
+        [HttpPost("query/own")]
         public ApiRes CapsQueryOwn([Required] string UserId, [Required] string session)
         {
             if (!Request.Cookies.TryGetValue(UserId, out session))
@@ -160,7 +162,7 @@ namespace TimCap.Controllers
         /// <param name="UserId">用户Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
-        [HttpPost("timecap/query/dig")]
+        [HttpPost("query/dig")]
         public ApiRes CapsQueryDig([Required] string UserId, [Required] string session)
         {
             if (!Request.Cookies.TryGetValue(UserId, out session))
@@ -182,7 +184,7 @@ namespace TimCap.Controllers
         /// <param name="address">挖掘地点</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
-        [HttpPost("timecap/dig")]
+        [HttpPost("dig")]
         public ApiRes Dig([Required] string userId, [Required] string address, [Required] string session)
         {
             if (!Request.Cookies.TryGetValue(userId, out session))
@@ -194,6 +196,10 @@ namespace TimCap.Controllers
                                                          where item.UserDig == userId
                                                          select item.CapId).Contains(c.CapId)
                         select c.CapId).ToList();
+            if (!capIds.Any())
+            {
+                return new ApiRes(ApiCode.Error, "没有瓶子了", -1);
+            }
             var rand = new Random();
             var capId = capIds[rand.Next(capIds.Count)];
             var cap = _context.Caps.Find(capId);
