@@ -9,14 +9,20 @@ namespace TimCap.Model
 {
     public class CapDig
     {
-        [ForeignKey("CapOwnId")]
+        [ForeignKey("CapId")]
         public Caps Cap { get; set; }
         [Key,Column(Order = 1)]
         public string UserDig { get; set; }
         [Key,Column(Order = 2)]
         public int CapId { get; set; }
+        public DateTime DigTime { get; set; }
 
-        public DateTime OutTime { get; set; }
-
+        public CapDig() { }
+        public CapDig(string userId, int capId)
+        {
+            UserDig = userId;
+            CapId = capId;
+            DigTime = DateTime.Now;
+        }
     }
 }

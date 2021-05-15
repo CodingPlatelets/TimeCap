@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TimCap.DAO;
 
 namespace TimCap.Migrations
 {
     [DbContext(typeof(TimeCapContext))]
-    partial class TimeCapContextModelSnapshot : ModelSnapshot
+    [Migration("20210515090801_Rename")]
+    partial class Rename
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,10 +27,15 @@ namespace TimCap.Migrations
                     b.Property<string>("UserDig")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<int?>("CapOwnId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("DigTime")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("CapId", "UserDig");
+
+                    b.HasIndex("CapOwnId");
 
                     b.ToTable("CapDigs");
                 });
@@ -60,9 +67,7 @@ namespace TimCap.Migrations
                 {
                     b.HasOne("TimCap.Model.Caps", "Cap")
                         .WithMany()
-                        .HasForeignKey("CapId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CapOwnId");
 
                     b.Navigation("Cap");
                 });
