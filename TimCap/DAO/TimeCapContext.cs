@@ -23,7 +23,7 @@ namespace TimCap.DAO
         //初始化数据库
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
+            modelBuilder.Entity<CapDig>().HasKey(c => new { c.CapId, c.UserDig });
         }
     }
 }
