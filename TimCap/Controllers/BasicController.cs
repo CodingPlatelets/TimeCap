@@ -11,10 +11,11 @@ using Microsoft.Extensions.Caching.Memory;
 using TimCap.DAO;
 using TimCap.Model;
 using TimCap.Services;
+using Microsoft.Extensions.Logging;
 
 namespace TimCap.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class BasicController : ControllerBase
     {
@@ -22,8 +23,9 @@ namespace TimCap.Controllers
         private IMemoryCache _cache;
         private MemoryCacheEntryOptions _options;
         private LoginService _service;
+        private readonly ILogger _logger;
 
-        public BasicController(TimeCapContext context, IMemoryCache cache,LoginService service)
+        public BasicController(TimeCapContext context, IMemoryCache cache, LoginService service, ILogger<BasicController> logger)
         {
             _context = context;
             _cache = cache;
@@ -32,24 +34,25 @@ namespace TimCap.Controllers
                 SlidingExpiration = TimeSpan.FromMinutes(10),
             };
             _service = service;
+            _logger = logger;
         }
 
 
-        [HttpGet("test")]
+        [HttpGet("")]
         public string Func()
         {
             return "ok";
         }
 
         [HttpPost("timecap/loginccnu")]
-        public ApiRes LoginCcnu([Required] string UserId,[Required] string pwd)
+        public ApiRes LoginCcnu([Required] string userId,[Required] string pwd)
         {
             var ran = new Random();
             string session = ran.Next(1000000, 9999999).ToString();
-            _cache.Set(UserId,session, _options);
+            _cache.Set(userId,session, _options);
             var user = new User
             {
-                sno = UserId,
+                sno = userId,
                 password = pwd
             };
             var apiRes = _service.LoginThrougthCcnu(user).Result;
@@ -62,18 +65,20 @@ namespace TimCap.Controllers
         }
 
 
-        [HttpPost("timecap/loginwut")]
-        public ApiRes LoginWut([Required] string UserId, [Required] string session)
+        [HttpGet("timecap/loginwut")]
+        public RedirectResult LoginWut()
         {
-            _cache.Set(UserId, session, _options);
-            Response.Redirect(
-                "http://ias.sso.itoken.team/portal.php?posturl=https%3A%2F%2Flucky-day.itoken.team%2Flucky_2019%2flogin%2fias&continueurl=");
-
-
-
-            return new ApiRes(ApiCode.Success, "登录成功", session);
+            return Redirect(
+                "http://ias.sso.itoken.team/portal.php?posturl=http://saicem.top:5905/api/timecap/callback");
         }
 
+        [HttpPost("timecap/callback")]
+        public ApiRes LoginCallBack([FromBody] string body)
+        {
+            var tmp = "---------------------------------\n";
+            _logger.LogInformation(tmp + body + tmp);
+            return new ApiRes(ApiCode.Success, "", body);
+        }
 
         /// <summary>
         /// 添加一个胶囊
@@ -103,7 +108,6 @@ namespace TimCap.Controllers
         /// <param name="CapId">胶囊Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
-
         [HttpDelete("timecap/remove")]
         public ApiRes Remove([Required] string UserId,[Required] int CapId,[Required] string session)
         {

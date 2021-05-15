@@ -20,6 +20,7 @@ namespace TimCap
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    webBuilder.UseUrls("http://+:5905");
                     webBuilder.UseStartup<Startup>();
                 });
     }
