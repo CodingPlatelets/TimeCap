@@ -28,7 +28,7 @@ namespace TimCap.Controllers
         }
 
         [HttpPost("timecap/add")]
-        public ApiRes AddItem([Required]string Story, [Required]string Address, string UserId)
+        public ApiRes AddItem([Required] string UserId, [Required]string Story, [Required]string Address, [Required]string session)
         {
             _context.Caps.Add(new Cap
             {
@@ -37,7 +37,28 @@ namespace TimCap.Controllers
                 Address = Address,
                 UserId = UserId
             });
+            _context.SaveChanges();
             return new ApiRes(ApiCode.Success, "how are you", Story);
+        }
+
+        [HttpGet("timecap/remove")]
+        public ApiRes Remove([Required] string UserId,[Required] int CapId,[Required] string session)
+        {
+            var cap = _context.Caps.Find(CapId);
+            return new ApiRes(ApiCode.Success, "", cap);
+        }
+
+
+        [HttpPost("timecap/query")]
+        public ApiRes Query([Required] string UserId, [Required] string session)
+        {
+            return new ApiRes(ApiCode.Success, "", null);
+        }
+
+        [HttpPost("timecap/dig")]
+        public ApiRes Dig([Required] string UserId, [Required] string address, [Required] string session)
+        {
+            return new ApiRes(ApiCode.Success, "", null);
         }
     }
 }
