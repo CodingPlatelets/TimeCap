@@ -7,11 +7,13 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.Caching.Memory;
 using TimCap.DAO;
 using TimCap.Model;
 using TimCap.Services;
 using Microsoft.Extensions.Logging;
+
 
 namespace TimCap.Controllers
 {
@@ -20,18 +22,19 @@ namespace TimCap.Controllers
     public class BasicController : ControllerBase
     {
         private readonly TimeCapContext _context;
-        private IMemoryCache _cache;
-        private MemoryCacheEntryOptions _options;
+        // private IMemoryCache _cache;
+        // private Session _session;
+        private CookieOptions _options;
         private LoginService _service;
         private readonly ILogger _logger;
 
-        public BasicController(TimeCapContext context, IMemoryCache cache, LoginService service, ILogger<BasicController> logger)
+        public BasicController(TimeCapContext context, /*DistributedSession session,*/ LoginService service, ILogger<BasicController> logger)
         {
             _context = context;
-            _cache = cache;
-            _options = new MemoryCacheEntryOptions()
+            // _session = session;
+            _options = new CookieOptions()
             {
-                SlidingExpiration = TimeSpan.FromMinutes(10),
+                Expires = DateTime.Now.AddDays(1)
             };
             _service = service;
             _logger = logger;
@@ -49,7 +52,7 @@ namespace TimCap.Controllers
         {
             var ran = new Random();
             string session = ran.Next(1000000, 9999999).ToString();
-            _cache.Set(userId,session, _options);
+            // _cache.Set(userId,session, _options);
             var user = new User
             {
                 sno = userId,
@@ -60,7 +63,8 @@ namespace TimCap.Controllers
             {
                 return apiRes;
             }
-            
+
+            Response.Cookies.Append(userId, session, _options);
             return new ApiRes(ApiCode.Success, "登录成功", session);
         }
 
@@ -91,7 +95,7 @@ namespace TimCap.Controllers
         [HttpPost("timecap/add")]
         public ApiRes AddItem([Required] string UserId, [Required] string Address, [Required] string Story, [Required] string session)
         {
-            if (_cache.Get<string>(UserId) != session)
+            if (!Request.Cookies.TryGetValue(UserId,out session))
             {
                 return new ApiRes(ApiCode.Error, "用户未登录", null);
             }
@@ -111,7 +115,7 @@ namespace TimCap.Controllers
         [HttpDelete("timecap/remove")]
         public ApiRes Remove([Required] string UserId,[Required] int CapId,[Required] string session)
         {
-            if (_cache.Get<string>(UserId) != session)
+            if (!Request.Cookies.TryGetValue(UserId, out session))
             {
                 return new ApiRes(ApiCode.Error, "用户未登录", null);
             }
@@ -140,7 +144,7 @@ namespace TimCap.Controllers
         [HttpPost("timecap/query/own")]
         public ApiRes CapsQueryOwn([Required] string UserId, [Required] string session)
         {
-            if (_cache.Get<string>(UserId) != session)
+            if (!Request.Cookies.TryGetValue(UserId, out session))
             {
                 return new ApiRes(ApiCode.Error, "用户未登录", null);
             }
@@ -159,7 +163,7 @@ namespace TimCap.Controllers
         [HttpPost("timecap/query/dig")]
         public ApiRes CapsQueryDig([Required] string UserId, [Required] string session)
         {
-            if (_cache.Get<string>(UserId) != session)
+            if (!Request.Cookies.TryGetValue(UserId, out session))
             {
                 return new ApiRes(ApiCode.Error, "用户未登录", null);
             }
@@ -181,7 +185,7 @@ namespace TimCap.Controllers
         [HttpPost("timecap/dig")]
         public ApiRes Dig([Required] string userId, [Required] string address, [Required] string session)
         {
-            if (_cache.Get<string>(userId) != session)
+            if (!Request.Cookies.TryGetValue(userId, out session))
             {
                 return new ApiRes(ApiCode.Error, "用户未登录", null);
             }
