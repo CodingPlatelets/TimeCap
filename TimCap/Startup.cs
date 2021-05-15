@@ -10,6 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
+using TimCap.DAO;
 
 namespace TimCap
 {
@@ -25,12 +28,15 @@ namespace TimCap
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            var connStr = Configuration.GetConnectionString("TimeCapContext");
+            services.AddDbContext<TimeCapContext>(opt =>
+                opt.UseMySql(connStr, ServerVersion.AutoDetect(connStr)));
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TimCap", Version = "v1" });
             });
+           
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
