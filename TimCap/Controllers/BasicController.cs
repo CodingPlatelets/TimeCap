@@ -25,24 +25,30 @@ namespace TimCap.Controllers
     {
 
         private readonly TimeCapContext _context;
-        // private IMemoryCache _cache;
+        private readonly IMemoryCache _cache;
         // private Session _session;
-        private CookieOptions _options;
-        private LoginService _service;
+        private readonly CookieOptions _cookieOption;
+        private readonly MemoryCacheEntryOptions _cacheOption;
+        private readonly LoginService _service;
         private readonly ILogger _logger;
 
-        public BasicController(TimeCapContext context, /*DistributedSession session,*/ LoginService service, ILogger<BasicController> logger)
+        public BasicController(TimeCapContext context, /*DistributedSession session,*/ LoginService service, ILogger<BasicController> logger, IMemoryCache cache)
         {
             _context = context;
             // _session = session;
-            _options = new CookieOptions()
+            _cookieOption = new CookieOptions()
             {
-                Expires = DateTime.Now.AddDays(1)
+                Expires = DateTime.Now.AddMinutes(10)
+            };
+            _cacheOption = new MemoryCacheEntryOptions()
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(10)
             };
             _service = service;
+            _cache = cache;
             _logger = logger;
         }
-        private string GenerateFakeFinger()
+        private static string GenerateFakeFinger()
         {
             var random = new Random();
             var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -62,7 +68,7 @@ namespace TimCap.Controllers
         {
             _logger.LogInformation("login ccnu");
             string session = GenerateFakeFinger();
-            // _cache.Set(userId,session, _options);
+            _cache.Set(userid, session, _cacheOption);
             var user = new User
             {
                 sno = userid,
@@ -74,8 +80,9 @@ namespace TimCap.Controllers
                 return apiRes;
             }
 
-            Response.Cookies.Append(userid, session, _options);
-            return new ApiResponse(ApiCode.Success, "登录成功", session);
+            Response.Cookies.Append(userid, session, _cookieOption);
+            _cache.Set(userid, session, _cacheOption);
+            return new ApiResponse(ApiCode.Success, "登录成功", null);
         }
 
 
@@ -93,8 +100,9 @@ namespace TimCap.Controllers
             string session = GenerateFakeFinger();
             var jsonUser = JsonSerializer.Deserialize<WhutUserInfo>(HttpUtility.UrlDecode(user));
             var sno = jsonUser.Sno;
-            Response.Cookies.Append(sno, session, _options);
-            return new ApiResponse(ApiCode.Success, "登录成功", session);
+            Response.Cookies.Append(sno, session, _cookieOption);
+            _cache.Set(sno, session, _cacheOption);
+            return new ApiResponse(ApiCode.Success, "登录成功", null);
         }
 
         /// <summary>
@@ -106,14 +114,19 @@ namespace TimCap.Controllers
         /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpPost("add")]
-        public ApiResponse AddItem([Required] string userid, [Required] string address, [Required] string story, [Required] string session)
+        public ApiResponse AddItem([Required] string address, [Required] string story)
         {
-            _logger.LogInformation($"add {userid} {address} {story} {session}");
-            if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
+            _logger.LogInformation($"add {address} {story}");
+            var userId = Request.Cookies.Keys.FirstOrDefault();
+            if (userId == null
+                || !Request.Cookies.TryGetValue(userId, out string session)
+                || !_cache.TryGetValue(userId, out string cacheSession)
+                || session != cacheSession)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
-            _context.Capsules.Add(new Capsule(userid, address, story));
+
+            _context.Capsules.Add(new Capsule(userId, address, story));
             _context.SaveChanges();
             return new ApiResponse(ApiCode.Success, "添加胶囊成功", story);
         }
@@ -126,27 +139,32 @@ namespace TimCap.Controllers
         /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpDelete("remove")]
-        public ApiResponse Remove([Required] string userid,[Required] int capid,[Required] string session)
+        public ApiResponse Remove([Required] int capid)
         {
-            _logger.LogInformation($"remove {userid} {capid} {session}");
-            if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
+            _logger.LogInformation($"remove {capid}");
+            var userId = Request.Cookies.Keys.FirstOrDefault();
+            if (userId == null
+                || !Request.Cookies.TryGetValue(userId, out string session)
+                || !_cache.TryGetValue(userId, out string cacheSession)
+                || session != cacheSession)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
+
             var cap = _context.Capsules.Find(capid);
             if (cap == null)
             {
                 return new ApiResponse(ApiCode.Error, "不存在此胶囊", null);
             }
 
-            if (cap.UserId == userid)
+            if (cap.UserId == userId)
             {
                 _context.Remove(cap);
                 _context.SaveChanges();
                 return new ApiResponse(ApiCode.Success, "胶囊删除成功", null);
             }
 
-            return new ApiResponse(ApiCode.Error, "用户错误", null);
+            return new ApiResponse(ApiCode.Error, "没有权限", null);
         }
 
         /// <summary>
@@ -155,16 +173,20 @@ namespace TimCap.Controllers
         /// <param name="userid">用户Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
-        [HttpPost("query/own")]
-        public ApiResponse CapsQueryOwn([Required] string userid, [Required] string session)
+        [HttpGet("query/own")]
+        public ApiResponse CapsQueryOwn()
         {
-            _logger.LogInformation($"query/own {userid} {session}");
-            if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
+            var userId = Request.Cookies.Keys.FirstOrDefault();
+            if (userId == null
+                || !Request.Cookies.TryGetValue(userId, out string session)
+                || !_cache.TryGetValue(userId, out string cacheSession)
+                || session != cacheSession)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
+
             var caps = (from item in _context.Capsules
-                where item.UserId == userid
+                where item.UserId == userId
                 select item).AsNoTracking();
             return new ApiResponse(ApiCode.Success, "查询成功", caps);
         }
@@ -175,17 +197,21 @@ namespace TimCap.Controllers
         /// <param name="userid">用户Id</param>
         /// <param name="session">鉴权</param>
         /// <returns></returns>
-        [HttpPost("query/dig")]
-        public ApiResponse CapsQueryDig([Required] string userid, [Required] string session)
+        [HttpGet("query/dig")]
+        public ApiResponse CapsQueryDig()
         {
-            _logger.LogInformation($"query/dig {userid} {session}");
-            if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
+            var userId = Request.Cookies.Keys.FirstOrDefault();
+            if (userId == null
+                || !Request.Cookies.TryGetValue(userId, out string session)
+                || !_cache.TryGetValue(userId, out string cacheSession)
+                || session != cacheSession)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
+
             var caps = (from c in _context.Capsules
                        where (from item in _context.CapsuleDigs
-                              where item.UserDig == userid
+                              where item.UserDig == userId
                               select item.CapsuleId).Contains(c.CapsuleId)
                               select c).AsNoTracking();
             return new ApiResponse(ApiCode.Success, "查询成功", caps);
@@ -199,26 +225,30 @@ namespace TimCap.Controllers
         /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpPost("dig")]
-        public ApiResponse Dig([Required] string userid, [Required] string address, [Required] string session)
+        public ApiResponse Dig([Required] string address)
         {
-            _logger.LogInformation($"dig {userid} {address} {session}");
-            if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
+            var userId = Request.Cookies.Keys.FirstOrDefault();
+            if (userId == null
+                || !Request.Cookies.TryGetValue(userId, out string session)
+                || !_cache.TryGetValue(userId, out string cacheSession)
+                || session != cacheSession)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
+
             var capIds = (from c in _context.Capsules 
                          where c.Address == address && !(from item in _context.CapsuleDigs
-                                                         where item.UserDig == userid
+                                                         where item.UserDig == userId
                                                          select item.CapsuleId).Contains(c.CapsuleId)
                         select c.CapsuleId).ToList();
             if (!capIds.Any())
             {
-                return new ApiResponse(ApiCode.Error, "没有瓶子了", -1);
+                return new ApiResponse(ApiCode.Success, "该地区没有瓶子了", -1);
             }
             var rand = new Random();
             var capId = capIds[rand.Next(capIds.Count)];
             var cap = _context.Capsules.Find(capId);
-            _context.CapsuleDigs.Add(new CapsuleDig(userid, capId));
+            _context.CapsuleDigs.Add(new CapsuleDig(userId, capId));
             _context.SaveChanges();
             return new ApiResponse(ApiCode.Success, "成功挖到了", cap);
         }

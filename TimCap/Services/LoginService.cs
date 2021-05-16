@@ -30,6 +30,8 @@ namespace TimCap.Services
                 {
                     Content = JsonContent.Create(user)
                 });
+
+            // todo 密码错误返回 500
             response.EnsureSuccessStatusCode();
             var IsSuccess = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result)
                 .RootElement.GetProperty("msg").GetString();
