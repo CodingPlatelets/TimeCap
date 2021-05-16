@@ -60,6 +60,7 @@ namespace TimCap.Controllers
         [HttpPost("loginccnu")]
         public ApiResponse LoginCcnu([Required] string userid,[Required] string pwd)
         {
+            _logger.LogInformation("login ccnu");
             string session = GenerateFakeFinger();
             // _cache.Set(userId,session, _options);
             var user = new User
@@ -81,6 +82,7 @@ namespace TimCap.Controllers
         [HttpGet("loginwut")]
         public RedirectResult LoginWut()
         {
+            _logger.LogInformation("login wut");
             return Redirect(
                 "http://ias.sso.itoken.team/portal.php?posturl=http://saicem.top:5905/api/timecap/callback");
         }
@@ -106,6 +108,7 @@ namespace TimCap.Controllers
         [HttpPost("add")]
         public ApiResponse AddItem([Required] string userid, [Required] string address, [Required] string story, [Required] string session)
         {
+            _logger.LogInformation($"add {userid} {address} {story} {session}");
             if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
@@ -125,6 +128,7 @@ namespace TimCap.Controllers
         [HttpDelete("remove")]
         public ApiResponse Remove([Required] string userid,[Required] int capid,[Required] string session)
         {
+            _logger.LogInformation($"remove {userid} {capid} {session}");
             if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
@@ -154,6 +158,7 @@ namespace TimCap.Controllers
         [HttpPost("query/own")]
         public ApiResponse CapsQueryOwn([Required] string userid, [Required] string session)
         {
+            _logger.LogInformation($"query/own {userid} {session}");
             if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
@@ -173,6 +178,7 @@ namespace TimCap.Controllers
         [HttpPost("query/dig")]
         public ApiResponse CapsQueryDig([Required] string userid, [Required] string session)
         {
+            _logger.LogInformation($"query/dig {userid} {session}");
             if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
@@ -195,6 +201,7 @@ namespace TimCap.Controllers
         [HttpPost("dig")]
         public ApiResponse Dig([Required] string userid, [Required] string address, [Required] string session)
         {
+            _logger.LogInformation($"dig {userid} {address} {session}");
             if (!Request.Cookies.TryGetValue(userid, out string storageSession) || storageSession != session)
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
