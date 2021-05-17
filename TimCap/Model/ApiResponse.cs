@@ -2,8 +2,17 @@
 {
     public class ApiResponse
     {
+        /// <summary>
+        /// 返回值
+        /// </summary>
         public ApiCode Code { get; set; }
+        /// <summary>
+        /// 说明消息
+        /// </summary>
         public string Message { get; set; }
+        /// <summary>
+        /// 数据
+        /// </summary>
         public object Data { get; set; }
         public ApiResponse() { }
         public ApiResponse(ApiCode code, string message, object data)

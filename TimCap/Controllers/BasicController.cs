@@ -52,7 +52,10 @@ namespace TimCap.Controllers
         }
         
 
-
+        /// <summary>
+        /// 测试接口
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("test")]
         public string Func()
         {
@@ -62,8 +65,8 @@ namespace TimCap.Controllers
         /// <summary>
         /// 华师登录
         /// </summary>
-        /// <param name="userid"></param>
-        /// <param name="pwd"></param>
+        /// <param name="userid">用户名</param>
+        /// <param name="pwd">密码</param>
         /// <returns></returns>
         [HttpPost("loginccnu")]
         public ApiResponse LoginCcnu([Required] string userid,[Required] string pwd)
@@ -98,6 +101,13 @@ namespace TimCap.Controllers
                 "http://ias.sso.itoken.team/portal.php?posturl=http://saicem.top:5905/api/timecap/callback");
         }
 
+        /// <summary>
+        /// 武理登录回调接口
+        /// </summary>
+        /// <param name="continueurl"></param>
+        /// <param name="user"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         [HttpPost("callback")]
         public ApiResponse LoginCallBack([FromForm]string continueurl, [FromForm] string user,[FromForm] string token)
         {

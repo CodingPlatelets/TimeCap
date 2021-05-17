@@ -4,6 +4,35 @@
         <name>TimCap</name>
     </assembly>
     <members>
+        <member name="M:TimCap.Controllers.BasicController.Func">
+            <summary>
+            测试接口
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TimCap.Controllers.BasicController.LoginCcnu(System.String,System.String)">
+            <summary>
+            华师登录
+            </summary>
+            <param name="userid">用户名</param>
+            <param name="pwd">密码</param>
+            <returns></returns>
+        </member>
+        <member name="M:TimCap.Controllers.BasicController.LoginWut">
+            <summary>
+            武理登录
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TimCap.Controllers.BasicController.LoginCallBack(System.String,System.String,System.String)">
+            <summary>
+            武理登录回调接口
+            </summary>
+            <param name="continueurl"></param>
+            <param name="user"></param>
+            <param name="token"></param>
+            <returns></returns>
+        </member>
         <member name="M:TimCap.Controllers.BasicController.AddItem(System.String,System.String)">
             <summary>
             添加一个胶囊
@@ -37,6 +66,21 @@
             </summary>
             <param name="address">挖掘地点</param>
             <returns></returns>
+        </member>
+        <member name="P:TimCap.Model.ApiResponse.Code">
+            <summary>
+            返回值
+            </summary>
+        </member>
+        <member name="P:TimCap.Model.ApiResponse.Message">
+            <summary>
+            说明消息
+            </summary>
+        </member>
+        <member name="P:TimCap.Model.ApiResponse.Data">
+            <summary>
+            数据
+            </summary>
         </member>
         <member name="T:TimCap.Model.ApiCode">
             <summary>
