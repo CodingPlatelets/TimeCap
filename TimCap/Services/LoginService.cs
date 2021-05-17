@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -20,17 +21,28 @@ namespace TimCap.Services
             Client = client;
         }
 
-        public async Task<ApiResponse> LoginThrougthCcnu(User user)
+        public async Task<ApiResponse> LoginThrougthCcnu(User ccnuUser)
         {
-            
-            var response = await Client.SendAsync(
-                new HttpRequestMessage(
-                    HttpMethod.Post, "api/signin"
-                )
-                {
-                    Content = JsonContent.Create(user)
-                });
+            HttpResponseMessage response = null;
+            try
+            {
+                response = await Client.SendAsync(
+                        new HttpRequestMessage(
+                            HttpMethod.Post, "api/signin"
+                        )
+                        {
+                            Content = JsonContent.Create(ccnuUser)
+                        });
+            }
+            catch (Exception e)
+            {
+                return new ApiResponse(ApiCode.Error, "登录失败", e.ToString());
+            }
 
+            if (response.StatusCode !=  HttpStatusCode.OK)
+            {
+                return new ApiResponse(ApiCode.Error, "服务异常", null);
+            }
             // todo 密码错误返回 500
             response.EnsureSuccessStatusCode();
             var IsSuccess = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result)

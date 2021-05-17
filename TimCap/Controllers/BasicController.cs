@@ -63,12 +63,12 @@ namespace TimCap.Controllers
         {
             _logger.LogInformation("login ccnu");
             string session = Sha1(userid) + GenerateFakeFinger();
-            var user = new User
+            var ccnuUser = new User
             {
                 sno = userid,
                 password = pwd
             };
-            var apiRes = _service.LoginThrougthCcnu(user).Result;
+            var apiRes = _service.LoginThrougthCcnu(ccnuUser).Result;
             if (apiRes.Code == ApiCode.Error)
             {
                 return apiRes;
