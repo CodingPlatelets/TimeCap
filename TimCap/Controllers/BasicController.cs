@@ -21,7 +21,7 @@ using TimCap.Tools;
 
 namespace TimCap.Controllers
 {
-    [Route("api/timecap")]
+    [Route("timecap")]
     [ApiController]
     public class BasicController : ControllerBase
     {
