@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Web;
+using System.Security.Cryptography;
 
 namespace TimCap.Controllers
 {
@@ -48,13 +49,7 @@ namespace TimCap.Controllers
             _cache = cache;
             _logger = logger;
         }
-        private static string GenerateFakeFinger()
-        {
-            var random = new Random();
-            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var finger = new string(Enumerable.Repeat(chars, 50).Select(s => s[random.Next(chars.Length)]).ToArray());
-            return finger;
-        }
+        
 
 
         [HttpGet("test")]
@@ -67,8 +62,7 @@ namespace TimCap.Controllers
         public ApiResponse LoginCcnu([Required] string userid,[Required] string pwd)
         {
             _logger.LogInformation("login ccnu");
-            string session = GenerateFakeFinger();
-            _cache.Set(userid, session, _cacheOption);
+            string session = Sha1(userid) + GenerateFakeFinger();
             var user = new User
             {
                 sno = userid,
@@ -80,8 +74,8 @@ namespace TimCap.Controllers
                 return apiRes;
             }
 
-            Response.Cookies.Append(userid, session, _cookieOption);
-            _cache.Set(userid, session, _cacheOption);
+            Response.Cookies.Append("session", session, _cookieOption);
+            _cache.Set(session, userid, _cacheOption);
             return new ApiResponse(ApiCode.Success, "登录成功", null);
         }
 
@@ -97,11 +91,11 @@ namespace TimCap.Controllers
         [HttpPost("callback")]
         public ApiResponse LoginCallBack([FromForm]string continueurl, [FromForm] string user,[FromForm] string token)
         {
-            string session = GenerateFakeFinger();
             var jsonUser = JsonSerializer.Deserialize<WhutUserInfo>(HttpUtility.UrlDecode(user));
             var sno = jsonUser.Sno;
-            Response.Cookies.Append(sno, session, _cookieOption);
-            _cache.Set(sno, session, _cacheOption);
+            string session = Sha1(sno) + GenerateFakeFinger();
+            Response.Cookies.Append("session", session, _cookieOption);
+            _cache.Set(session, sno, _cacheOption);
             return new ApiResponse(ApiCode.Success, "登录成功", null);
         }
 
@@ -117,11 +111,7 @@ namespace TimCap.Controllers
         public ApiResponse AddItem([Required] string address, [Required] string story)
         {
             _logger.LogInformation($"add {address} {story}");
-            var userId = Request.Cookies.Keys.FirstOrDefault();
-            if (userId == null
-                || !Request.Cookies.TryGetValue(userId, out string session)
-                || !_cache.TryGetValue(userId, out string cacheSession)
-                || session != cacheSession)
+            if (!Request.Cookies.TryGetValue("session", out string session) || !_cache.TryGetValue(session, out string userId))
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
@@ -142,11 +132,7 @@ namespace TimCap.Controllers
         public ApiResponse Remove([Required] int capid)
         {
             _logger.LogInformation($"remove {capid}");
-            var userId = Request.Cookies.Keys.FirstOrDefault();
-            if (userId == null
-                || !Request.Cookies.TryGetValue(userId, out string session)
-                || !_cache.TryGetValue(userId, out string cacheSession)
-                || session != cacheSession)
+            if (!Request.Cookies.TryGetValue("session", out string session) || !_cache.TryGetValue(session, out string userId))
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
@@ -176,11 +162,7 @@ namespace TimCap.Controllers
         [HttpGet("query/own")]
         public ApiResponse CapsQueryOwn()
         {
-            var userId = Request.Cookies.Keys.FirstOrDefault();
-            if (userId == null
-                || !Request.Cookies.TryGetValue(userId, out string session)
-                || !_cache.TryGetValue(userId, out string cacheSession)
-                || session != cacheSession)
+            if (!Request.Cookies.TryGetValue("session", out string session) || !_cache.TryGetValue(session, out string userId))
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
@@ -200,11 +182,7 @@ namespace TimCap.Controllers
         [HttpGet("query/dig")]
         public ApiResponse CapsQueryDig()
         {
-            var userId = Request.Cookies.Keys.FirstOrDefault();
-            if (userId == null
-                || !Request.Cookies.TryGetValue(userId, out string session)
-                || !_cache.TryGetValue(userId, out string cacheSession)
-                || session != cacheSession)
+            if (!Request.Cookies.TryGetValue("session", out string session) || !_cache.TryGetValue(session, out string userId))
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
@@ -227,11 +205,7 @@ namespace TimCap.Controllers
         [HttpPost("dig")]
         public ApiResponse Dig([Required] string address)
         {
-            var userId = Request.Cookies.Keys.FirstOrDefault();
-            if (userId == null
-                || !Request.Cookies.TryGetValue(userId, out string session)
-                || !_cache.TryGetValue(userId, out string cacheSession)
-                || session != cacheSession)
+            if (!Request.Cookies.TryGetValue("session", out string session) || !_cache.TryGetValue(session, out string userId))
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
@@ -251,6 +225,26 @@ namespace TimCap.Controllers
             _context.CapsuleDigs.Add(new CapsuleDig(userId, capId));
             _context.SaveChanges();
             return new ApiResponse(ApiCode.Success, "成功挖到了", cap);
+        }
+
+        private static string GenerateFakeFinger()
+        {
+            var random = new Random();
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var finger = new string(Enumerable.Repeat(chars, 50).Select(s => s[random.Next(chars.Length)]).ToArray());
+            return finger;
+        }
+
+        private static string Sha1(string oldstring)
+        {
+            byte[] byteOld = Encoding.UTF8.GetBytes(oldstring);
+            byte[] byteNew = SHA1.Create().ComputeHash(byteOld);
+            StringBuilder sb = new();
+            foreach (var b in byteNew)
+            {
+                sb.Append(b.ToString("x2"));
+            }
+            return sb.ToString();
         }
     }
 }
