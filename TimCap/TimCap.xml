@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>TimCap</name>
+    </assembly>
+    <members>
+        <member name="M:TimCap.Controllers.BasicController.AddItem(System.String,System.String)">
+            <summary>
+            添加一个胶囊
+            </summary>
+            <param name="story">故事</param>
+            <param name="address">地点</param>
+            <returns></returns>
+        </member>
+        <member name="M:TimCap.Controllers.BasicController.Remove(System.Int32)">
+            <summary>
+            删除用户的胶囊
+            </summary>
+            <param name="capid">胶囊Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:TimCap.Controllers.BasicController.CapsQueryOwn">
+            <summary>
+            查询用户拥有的胶囊
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TimCap.Controllers.BasicController.CapsQueryDig">
+            <summary>
+            查询用户挖到的胶囊
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:TimCap.Controllers.BasicController.Dig(System.String)">
+            <summary>
+            挖时光胶囊
+            </summary>
+            <param name="address">挖掘地点</param>
+            <returns></returns>
+        </member>
+        <member name="T:TimCap.Model.ApiCode">
+            <summary>
+            返回值 0成功 -1错误
+            </summary>
+        </member>
+        <member name="F:TimCap.Model.ApiCode.Success">
+            <summary>
+            成功
+            </summary>
+        </member>
+        <member name="F:TimCap.Model.ApiCode.Error">
+            <summary>
+            失败
+            </summary>
+        </member>
+    </members>
+</doc>

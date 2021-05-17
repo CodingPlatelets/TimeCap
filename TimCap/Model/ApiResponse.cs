@@ -14,6 +14,9 @@
         }
     }
 
+    /// <summary>
+    /// 返回值 0成功 -1错误
+    /// </summary>
     public enum ApiCode
     {
         /// <summary>

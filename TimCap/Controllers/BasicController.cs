@@ -59,6 +59,12 @@ namespace TimCap.Controllers
             return "ok";
         }
 
+        /// <summary>
+        /// 华师登录
+        /// </summary>
+        /// <param name="userid"></param>
+        /// <param name="pwd"></param>
+        /// <returns></returns>
         [HttpPost("loginccnu")]
         public ApiResponse LoginCcnu([Required] string userid,[Required] string pwd)
         {
@@ -80,7 +86,10 @@ namespace TimCap.Controllers
             return new ApiResponse(ApiCode.Success, "登录成功", null);
         }
 
-
+        /// <summary>
+        /// 武理登录
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("loginwut")]
         public RedirectResult LoginWut()
         {
@@ -103,10 +112,8 @@ namespace TimCap.Controllers
         /// <summary>
         /// 添加一个胶囊
         /// </summary>
-        /// <param name="userid">用户Id</param>
         /// <param name="story">故事</param>
         /// <param name="address">地点</param>
-        /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpPost("add")]
         public ApiResponse AddItem([Required] string address, [Required] string story)
@@ -125,9 +132,7 @@ namespace TimCap.Controllers
         /// <summary>
         /// 删除用户的胶囊
         /// </summary>
-        /// <param name="userid">用户Id</param>
         /// <param name="capid">胶囊Id</param>
-        /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpDelete("remove")]
         public ApiResponse Remove([Required] int capid)
@@ -157,8 +162,6 @@ namespace TimCap.Controllers
         /// <summary>
         /// 查询用户拥有的胶囊
         /// </summary>
-        /// <param name="userid">用户Id</param>
-        /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpGet("query/own")]
         public ApiResponse CapsQueryOwn()
@@ -177,8 +180,6 @@ namespace TimCap.Controllers
         /// <summary>
         /// 查询用户挖到的胶囊
         /// </summary>
-        /// <param name="userid">用户Id</param>
-        /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpGet("query/dig")]
         public ApiResponse CapsQueryDig()
@@ -199,9 +200,7 @@ namespace TimCap.Controllers
         /// <summary>
         /// 挖时光胶囊
         /// </summary>
-        /// <param name="userid">用户Id</param>
         /// <param name="address">挖掘地点</param>
-        /// <param name="session">鉴权</param>
         /// <returns></returns>
         [HttpPost("dig")]
         public ApiResponse Dig([Required] string address)
