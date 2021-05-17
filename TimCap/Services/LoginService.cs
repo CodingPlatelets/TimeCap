@@ -36,25 +36,26 @@ namespace TimCap.Services
             }
             catch (Exception e)
             {
-                return new ApiResponse(ApiCode.Error, "登录失败", e.ToString());
+                return new ApiResponse(ApiCode.Error, "post网址错误", e.ToString());
             }
 
-            if (response.StatusCode !=  HttpStatusCode.OK)
+            if (response.StatusCode ==  HttpStatusCode.Unauthorized)
             {
-                return new ApiResponse(ApiCode.Error, "服务异常", null);
+                return new ApiResponse(ApiCode.Error, "未授权", null);
             }
             response.EnsureSuccessStatusCode();
             var IsSuccess = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result)
                 .RootElement.GetProperty("msg").GetString();
-            if (IsSuccess != "登陆成功")
-            {
-                return new ApiResponse(ApiCode.Error,"登录失败",null);
-            }
-            else
-            {
+            // if (IsSuccess != "登陆成功")
+            // {
+            //     return new ApiResponse(ApiCode.Error,"密码错误",null);
+            // }
+            // else
+            // {
+            //不需要验证密码错误，因为密码错误会直接返回验证错误
                 return new ApiResponse(ApiCode.Success,"登录成功", JsonDocument.Parse(response.Content.ReadAsStringAsync().Result)
                     .RootElement.GetProperty("data").GetProperty("sno").GetString());
-            }
+            // }
 
         }
     }
