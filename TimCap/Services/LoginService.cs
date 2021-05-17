@@ -43,7 +43,6 @@ namespace TimCap.Services
             {
                 return new ApiResponse(ApiCode.Error, "服务异常", null);
             }
-            // todo 密码错误返回 500
             response.EnsureSuccessStatusCode();
             var IsSuccess = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result)
                 .RootElement.GetProperty("msg").GetString();
