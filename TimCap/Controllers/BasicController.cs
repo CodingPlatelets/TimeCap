@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Web;
 using System.Security.Cryptography;
+using TimCap.Tools;
 
 namespace TimCap.Controllers
 {
@@ -62,7 +63,7 @@ namespace TimCap.Controllers
         public ApiResponse LoginCcnu([Required] string userid,[Required] string pwd)
         {
             _logger.LogInformation("login ccnu");
-            string session = Sha1(userid) + GenerateFakeFinger();
+            string session = EncrypTool.Sha256(userid) + EncrypTool.GenerateFakeFinger();
             var ccnuUser = new User
             {
                 sno = userid,
@@ -93,7 +94,7 @@ namespace TimCap.Controllers
         {
             var jsonUser = JsonSerializer.Deserialize<WhutUserInfo>(HttpUtility.UrlDecode(user));
             var sno = jsonUser.Sno;
-            string session = Sha1(sno) + GenerateFakeFinger();
+            string session = EncrypTool.Sha256(sno) + EncrypTool.GenerateFakeFinger();
             Response.Cookies.Append("session", session, _cookieOption);
             _cache.Set(session, sno, _cacheOption);
             return new ApiResponse(ApiCode.Success, "登录成功", null);
@@ -225,26 +226,6 @@ namespace TimCap.Controllers
             _context.CapsuleDigs.Add(new CapsuleDig(userId, capId));
             _context.SaveChanges();
             return new ApiResponse(ApiCode.Success, "成功挖到了", cap);
-        }
-
-        private static string GenerateFakeFinger()
-        {
-            var random = new Random();
-            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var finger = new string(Enumerable.Repeat(chars, 50).Select(s => s[random.Next(chars.Length)]).ToArray());
-            return finger;
-        }
-
-        private static string Sha1(string oldstring)
-        {
-            byte[] byteOld = Encoding.UTF8.GetBytes(oldstring);
-            byte[] byteNew = SHA1.Create().ComputeHash(byteOld);
-            StringBuilder sb = new();
-            foreach (var b in byteNew)
-            {
-                sb.Append(b.ToString("x2"));
-            }
-            return sb.ToString();
         }
     }
 }

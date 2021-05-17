@@ -14,6 +14,8 @@ using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using TimCap.DAO;
 using TimCap.Services;
+using System.IO;
+using System.Reflection;
 
 namespace TimCap
 {
@@ -37,6 +39,10 @@ namespace TimCap
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TimCap", Version = "v1" });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
             services.AddHttpClient<LoginService>();
             services.AddLogging();
