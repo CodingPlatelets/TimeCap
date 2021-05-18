@@ -10,10 +10,9 @@ namespace TimCap.Model
     public class Capsule
     {
         [Key]
-        [ForeignKey("OutId")]
         public int CapsuleId { get; set; }
         public string Story { get; set; }
-        public DateTime InTime { get; set; }
+        public DateTime InTime { get; init; } = DateTime.Now;
         public string Address { get; set; }
         public string UserId { get; set; }
 
@@ -23,7 +22,13 @@ namespace TimCap.Model
             UserId = userId;
             Address = address;
             Story = story;
-            InTime = DateTime.Now;
+        }
+
+        public Capsule(CapsuleReceive capsuleReceive, string userId)
+        {
+            UserId = userId;
+            Address = capsuleReceive.Address;
+            Story = capsuleReceive.Story;
         }
     }
 }

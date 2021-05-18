@@ -75,8 +75,8 @@ namespace TimCap.Controllers
             string session = EncrypTool.Sha256(userid) + EncrypTool.GenerateFakeFinger();
             var ccnuUser = new User
             {
-                sno = userid,
-                password = pwd
+                Sno = userid,
+                Password = pwd
             };
             var apiRes = _service.LoginThrougthCcnu(ccnuUser).Result;
             if (apiRes.Code == ApiCode.Error)
@@ -84,7 +84,7 @@ namespace TimCap.Controllers
                 return apiRes;
             }
 
-            Response.Cookies.Append("session", session, _cookieOption);
+            Response.Cookies.Append("SESSION", session, _cookieOption);
             _cache.Set(session, userid, _cacheOption);
             return new ApiResponse(ApiCode.Success, "登录成功", null);
         }
@@ -114,7 +114,7 @@ namespace TimCap.Controllers
             var jsonUser = JsonSerializer.Deserialize<WhutUserInfo>(HttpUtility.UrlDecode(user));
             var sno = jsonUser.Sno;
             string session = EncrypTool.Sha256(sno) + EncrypTool.GenerateFakeFinger();
-            Response.Cookies.Append("session", session, _cookieOption);
+            Response.Cookies.Append("SESSION", session, _cookieOption);
             _cache.Set(session, sno, _cacheOption);
             return new ApiResponse(ApiCode.Success, "登录成功", null);
         }
@@ -122,21 +122,19 @@ namespace TimCap.Controllers
         /// <summary>
         /// 添加一个胶囊
         /// </summary>
-        /// <param name="story">故事</param>
-        /// <param name="address">地点</param>
         /// <returns></returns>
         [HttpPost("add")]
-        public ApiResponse AddItem([Required] string address, [Required] string story)
+        public ApiResponse AddItem([Required] CapsuleReceive capsuleReceive)
         {
-            _logger.LogInformation($"add {address} {story}");
-            if (!Request.Cookies.TryGetValue("session", out string session) || !_cache.TryGetValue(session, out string userId))
+            _logger.LogInformation($"add {capsuleReceive.Address} {capsuleReceive.Story}");
+            if (!Request.Cookies.TryGetValue("SESSION", out string session) || !_cache.TryGetValue(session, out string userId))
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
 
-            _context.Capsules.Add(new Capsule(userId, address, story));
+            _context.Capsules.Add(new Capsule(capsuleReceive, userId));
             _context.SaveChanges();
-            return new ApiResponse(ApiCode.Success, "添加胶囊成功", story);
+            return new ApiResponse(ApiCode.Success, "添加胶囊成功", new Capsule(capsuleReceive, "0121904950722"));
         }
 
         /// <summary>
@@ -148,7 +146,7 @@ namespace TimCap.Controllers
         public ApiResponse Remove([Required] int capid)
         {
             _logger.LogInformation($"remove {capid}");
-            if (!Request.Cookies.TryGetValue("session", out string session) || !_cache.TryGetValue(session, out string userId))
+            if (!Request.Cookies.TryGetValue("SESSION", out string session) || !_cache.TryGetValue(session, out string userId))
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
@@ -170,13 +168,13 @@ namespace TimCap.Controllers
         }
 
         /// <summary>
-        /// 查询用户拥有的胶囊
+        /// 查询用户埋的胶囊
         /// </summary>
         /// <returns></returns>
         [HttpGet("query/own")]
         public ApiResponse CapsQueryOwn()
         {
-            if (!Request.Cookies.TryGetValue("session", out string session) || !_cache.TryGetValue(session, out string userId))
+            if (!Request.Cookies.TryGetValue("SESSION", out string session) || !_cache.TryGetValue(session, out string userId))
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
@@ -194,7 +192,7 @@ namespace TimCap.Controllers
         [HttpGet("query/dig")]
         public ApiResponse CapsQueryDig()
         {
-            if (!Request.Cookies.TryGetValue("session", out string session) || !_cache.TryGetValue(session, out string userId))
+            if (!Request.Cookies.TryGetValue("SESSION", out string session) || !_cache.TryGetValue(session, out string userId))
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
@@ -215,7 +213,7 @@ namespace TimCap.Controllers
         [HttpPost("dig")]
         public ApiResponse Dig([Required] string address)
         {
-            if (!Request.Cookies.TryGetValue("session", out string session) || !_cache.TryGetValue(session, out string userId))
+            if (!Request.Cookies.TryGetValue("SESSION", out string session) || !_cache.TryGetValue(session, out string userId))
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }

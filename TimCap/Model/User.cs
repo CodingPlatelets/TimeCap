@@ -7,7 +7,7 @@ namespace TimCap.Model
 {
     public class User
     {
-        public string sno { get; set; }
-        public string password { get; set; }
+        public string Sno { get; set; }
+        public string Password { get; set; }
     }
 }

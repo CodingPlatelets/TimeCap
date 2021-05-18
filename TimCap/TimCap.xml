@@ -33,12 +33,10 @@
             <param name="token"></param>
             <returns></returns>
         </member>
-        <member name="M:TimCap.Controllers.BasicController.AddItem(System.String,System.String)">
+        <member name="M:TimCap.Controllers.BasicController.AddItem(TimCap.Model.CapsuleReceive)">
             <summary>
             添加一个胶囊
             </summary>
-            <param name="story">故事</param>
-            <param name="address">地点</param>
             <returns></returns>
         </member>
         <member name="M:TimCap.Controllers.BasicController.Remove(System.Int32)">
@@ -50,7 +48,7 @@
         </member>
         <member name="M:TimCap.Controllers.BasicController.CapsQueryOwn">
             <summary>
-            查询用户拥有的胶囊
+            查询用户埋的胶囊
             </summary>
             <returns></returns>
         </member>
@@ -95,6 +93,16 @@
         <member name="F:TimCap.Model.ApiCode.Error">
             <summary>
             失败
+            </summary>
+        </member>
+        <member name="P:TimCap.Model.CapsuleReceive.Address">
+            <summary>
+            地址
+            </summary>
+        </member>
+        <member name="P:TimCap.Model.CapsuleReceive.Story">
+            <summary>
+            故事
             </summary>
         </member>
     </members>

@@ -15,14 +15,13 @@ namespace TimCap.Model
         public string UserDig { get; set; }
         [Key,Column(Order = 2)]
         public int CapsuleId { get; set; }
-        public DateTime DigTime { get; set; }
+        public DateTime DigTime { get; init; } = DateTime.Now;
 
         public CapsuleDig() { }
-        public CapsuleDig(string userId, int capId)
+        public CapsuleDig(string userId, int capsuleId)
         {
             UserDig = userId;
-            CapsuleId = capId;
-            DigTime = DateTime.Now;
+            CapsuleId = capsuleId;
         }
     }
 }
