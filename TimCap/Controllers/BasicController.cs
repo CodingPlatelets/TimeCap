@@ -49,7 +49,7 @@ namespace TimCap.Controllers
             _cache = cache;
             _logger = logger;
         }
-        
+
 
         /// <summary>
         /// 测试接口
@@ -68,21 +68,20 @@ namespace TimCap.Controllers
         /// <param name="pwd">密码</param>
         /// <returns></returns>
         [HttpPost("login/ccnu")]
-        public ApiResponse LoginCcnu([Required] string userid,[Required] string pwd)
+        public async Task<ApiResponse> LoginCcnu([Required] string userid,[Required] string pwd)
         {
             _logger.LogInformation("login ccnu");
-            string session = EncrypTool.Sha256(userid) + EncrypTool.GenerateFakeFinger();
             var ccnuUser = new User
             {
                 Sno = userid,
                 Password = pwd
             };
-            var apiRes = _service.LoginThrougthCcnu(ccnuUser).Result;
+            var apiRes = await _service.LoginThrougthCcnu(ccnuUser);
             if (apiRes.Code == ApiCode.Error)
             {
                 return apiRes;
             }
-
+            string session = EncrypTool.Sha256(userid) + EncrypTool.GenerateFakeFinger();
             Response.Cookies.Append("SESSION", session, _cookieOption);
             _cache.Set(session, userid, _cacheOption);
             return new ApiResponse(ApiCode.Success, "登录成功", null);
@@ -108,7 +107,7 @@ namespace TimCap.Controllers
         /// <param name="token"></param>
         /// <returns></returns>
         [HttpPost("callback")]
-        public ApiResponse LoginCallBack([FromForm]string continueurl, [FromForm] string user,[FromForm] string token)
+        public ApiResponse LoginCallBack([FromForm] string continueurl, [FromForm] string user, [FromForm] string token)
         {
             var jsonUser = JsonSerializer.Deserialize<WhutUserInfo>(HttpUtility.UrlDecode(user));
             var sno = jsonUser.Sno;
@@ -179,8 +178,8 @@ namespace TimCap.Controllers
             }
 
             var caps = (from item in _context.Capsules
-                where item.UserId == userId
-                select item).AsNoTracking();
+                        where item.UserId == userId
+                        select item).AsNoTracking();
             return new ApiResponse(ApiCode.Success, "查询成功", caps);
         }
 
@@ -195,13 +194,13 @@ namespace TimCap.Controllers
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
-            
+
 
             var caps = (from c in _context.Capsules
-                       where (from item in _context.CapsuleDigs
-                              where item.UserDig == userId
-                              select item.CapsuleId).Contains(c.CapsuleId)
-                              select c).AsNoTracking();
+                        where (from item in _context.CapsuleDigs
+                               where item.UserDig == userId
+                               select item.CapsuleId).Contains(c.CapsuleId)
+                        select c).AsNoTracking();
             return new ApiResponse(ApiCode.Success, "查询成功", caps);
         }
 
@@ -218,11 +217,11 @@ namespace TimCap.Controllers
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
 
-            var capIds = (from c in _context.Capsules 
-                         where c.Address == address && !(from item in _context.CapsuleDigs
-                                                         where item.UserDig == userId
-                                                         select item.CapsuleId).Contains(c.CapsuleId)
-                        select c.CapsuleId).ToList();
+            var capIds = (from c in _context.Capsules
+                          where c.Address == address && !(from item in _context.CapsuleDigs
+                                                          where item.UserDig == userId
+                                                          select item.CapsuleId).Contains(c.CapsuleId)
+                          select c.CapsuleId).ToList();
             if (!capIds.Any())
             {
                 return new ApiResponse(ApiCode.Success, "该地区没有瓶子了", -1);

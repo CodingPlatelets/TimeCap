@@ -44,19 +44,13 @@ namespace TimCap.Services
                 return new ApiResponse(ApiCode.Error, "未授权", null);
             }
             response.EnsureSuccessStatusCode();
-            var IsSuccess = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result)
-                .RootElement.GetProperty("msg").GetString();
-            // if (IsSuccess != "登陆成功")
-            // {
-            //     return new ApiResponse(ApiCode.Error,"密码错误",null);
-            // }
-            // else
-            // {
-            //不需要验证密码错误，因为密码错误会直接返回验证错误
-                return new ApiResponse(ApiCode.Success,"登录成功", JsonDocument.Parse(response.Content.ReadAsStringAsync().Result)
-                    .RootElement.GetProperty("data").GetProperty("sno").GetString());
-            // }
-
+            return new ApiResponse(
+                ApiCode.Success, "登录成功", 
+                JsonDocument.Parse(await response.Content.ReadAsStringAsync())
+                .RootElement
+                .GetProperty("data")
+                .GetProperty("sno")
+                .GetString());
         }
     }
 }
