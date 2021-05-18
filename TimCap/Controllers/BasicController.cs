@@ -25,7 +25,6 @@ namespace TimCap.Controllers
     [ApiController]
     public class BasicController : ControllerBase
     {
-
         private readonly TimeCapContext _context;
         private readonly IMemoryCache _cache;
         // private Session _session;
@@ -68,7 +67,7 @@ namespace TimCap.Controllers
         /// <param name="userid">用户名</param>
         /// <param name="pwd">密码</param>
         /// <returns></returns>
-        [HttpPost("loginccnu")]
+        [HttpPost("login/ccnu")]
         public ApiResponse LoginCcnu([Required] string userid,[Required] string pwd)
         {
             _logger.LogInformation("login ccnu");
@@ -93,7 +92,7 @@ namespace TimCap.Controllers
         /// 武理登录
         /// </summary>
         /// <returns></returns>
-        [HttpGet("loginwut")]
+        [HttpGet("login/wut")]
         public RedirectResult LoginWut()
         {
             _logger.LogInformation("login wut");
@@ -134,7 +133,7 @@ namespace TimCap.Controllers
 
             _context.Capsules.Add(new Capsule(capsuleReceive, userId));
             _context.SaveChanges();
-            return new ApiResponse(ApiCode.Success, "添加胶囊成功", new Capsule(capsuleReceive, "0121904950722"));
+            return new ApiResponse(ApiCode.Success, "添加胶囊成功", null);
         }
 
         /// <summary>
@@ -196,6 +195,7 @@ namespace TimCap.Controllers
             {
                 return new ApiResponse(ApiCode.Error, "用户未登录", null);
             }
+            
 
             var caps = (from c in _context.Capsules
                        where (from item in _context.CapsuleDigs
@@ -206,7 +206,7 @@ namespace TimCap.Controllers
         }
 
         /// <summary>
-        /// 挖时光胶囊
+        /// 挖时间胶囊
         /// </summary>
         /// <param name="address">挖掘地点</param>
         /// <returns></returns>

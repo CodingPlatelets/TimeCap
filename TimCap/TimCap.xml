@@ -60,7 +60,7 @@
         </member>
         <member name="M:TimCap.Controllers.BasicController.Dig(System.String)">
             <summary>
-            挖时光胶囊
+            挖时间胶囊
             </summary>
             <param name="address">挖掘地点</param>
             <returns></returns>
