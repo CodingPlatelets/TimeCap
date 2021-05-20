@@ -81,7 +81,7 @@ namespace TimCap.Controllers
         {
             _logger.LogInformation("login wut");
             return Redirect(
-                "http://ias.sso.itoken.team/portal.php?posturl=http://saicem.top:5905/api/timecap/callback");
+                "http://ias.sso.itoken.team/portal.php?posturl=https://api.saicem.top/login/wut/callback");
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace TimCap.Controllers
         /// <param name="user"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        [HttpPost("login/callback")]
+        [HttpPost("wut/callback")]
         public ApiResponse LoginCallBack([FromForm] string continueurl, [FromForm] string user, [FromForm] string token)
         {
             var jsonUser = JsonSerializer.Deserialize<WhutUserInfo>(HttpUtility.UrlDecode(user));
