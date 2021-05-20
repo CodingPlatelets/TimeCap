@@ -4,13 +4,7 @@
         <name>TimCap</name>
     </assembly>
     <members>
-        <member name="M:TimCap.Controllers.BasicController.Func">
-            <summary>
-            测试接口
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:TimCap.Controllers.BasicController.LoginCcnu(System.String,System.String)">
+        <member name="M:TimCap.Controllers.LoginController.LoginCcnu(System.String,System.String)">
             <summary>
             华师登录
             </summary>
@@ -18,13 +12,13 @@
             <param name="pwd">密码</param>
             <returns></returns>
         </member>
-        <member name="M:TimCap.Controllers.BasicController.LoginWut">
+        <member name="M:TimCap.Controllers.LoginController.LoginWut">
             <summary>
             武理登录
             </summary>
             <returns></returns>
         </member>
-        <member name="M:TimCap.Controllers.BasicController.LoginCallBack(System.String,System.String,System.String)">
+        <member name="M:TimCap.Controllers.LoginController.LoginCallBack(System.String,System.String,System.String)">
             <summary>
             武理登录回调接口
             </summary>
@@ -33,32 +27,32 @@
             <param name="token"></param>
             <returns></returns>
         </member>
-        <member name="M:TimCap.Controllers.BasicController.AddItem(TimCap.Model.CapsuleReceive)">
+        <member name="M:TimCap.Controllers.TimeCapController.AddItem(TimCap.Model.CapsuleReceive)">
             <summary>
             添加一个胶囊
             </summary>
             <returns></returns>
         </member>
-        <member name="M:TimCap.Controllers.BasicController.Remove(System.Int32)">
+        <member name="M:TimCap.Controllers.TimeCapController.Remove(System.Int32)">
             <summary>
             删除用户的胶囊
             </summary>
             <param name="capid">胶囊Id</param>
             <returns></returns>
         </member>
-        <member name="M:TimCap.Controllers.BasicController.CapsQueryOwn">
+        <member name="M:TimCap.Controllers.TimeCapController.CapsQueryOwn">
             <summary>
             查询用户埋的胶囊
             </summary>
             <returns></returns>
         </member>
-        <member name="M:TimCap.Controllers.BasicController.CapsQueryDig">
+        <member name="M:TimCap.Controllers.TimeCapController.CapsQueryDig">
             <summary>
             查询用户挖到的胶囊
             </summary>
             <returns></returns>
         </member>
-        <member name="M:TimCap.Controllers.BasicController.Dig(System.String)">
+        <member name="M:TimCap.Controllers.TimeCapController.Dig(System.String)">
             <summary>
             挖时间胶囊
             </summary>
